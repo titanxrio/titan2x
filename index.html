@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>d3adnet | Discord Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #7289DA;
+            --primary-dark: #5a6fc7;
+            --dark: #12141D;
+            --darker: #0A0B10;
+            --light: #F5F5F5;
+            --accent: #FF3366;
+            --accent-dark: #e02255;
+            --gray: #2C2F3B;
+            --success: #43B581;
+            --success-dark: #359c6d;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(114, 137, 218, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 51, 102, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 50% 50%, rgba(67, 181, 129, 0.1) 0%, transparent 30%);
+            animation: gradientShift 20s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(114, 137, 218, 0.3);
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(0) translateX(20px); }
+            75% { transform: translateY(20px) translateX(10px); }
+            100% { transform: translateY(0) translateX(0); }
+        }
+
+        /* Main Container */
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: rgba(18, 20, 29, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            position: relative;
+            margin: 20px;
+            animation: fadeIn 1s ease, floatCard 8s ease-in-out infinite;
+            transform-origin: center;
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes floatCard {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Profile Header */
+        .header {
+            padding: 40px 20px 20px;
+            text-align: center;
+            position: relative;
+            background: linear-gradient(180deg, rgba(10, 11, 16, 0.8) 0%, transparent 100%);
+        }
+
+        .profile-badge {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            background: var(--accent);
+            color: var(--light);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 15px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(255, 51, 102, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 51, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0); }
+        }
+
+        .avatar-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 25px;
+            border-radius: 50%;
+            border: 4px solid var(--primary);
+            padding: 6px;
+            position: relative;
+            background: var(--dark);
+            box-shadow: 0 0 30px rgba(114, 137, 218, 0.5);
+            animation: borderGlow 3s infinite alternate;
+        }
+
+        @keyframes borderGlow {
+            0% { box-shadow: 0 0 20px rgba(114, 137, 218, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(114, 137, 218, 0.8); }
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: linear-gradient(45deg, #2C2F3B, #1A1C25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: transform 0.5s ease;
+        }
+
+        .avatar:hover {
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .username {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, var(--light), #B0B5CC);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 10px rgba(114, 137, 218, 0.3);
+        }
+
+        .tag {
+            color: #9EA5C4;
+            font-size: 18px;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(114, 137, 218, 0.5), transparent);
+            margin: 25px 40px;
+            animation: dividerGrow 1.5s ease-out;
+        }
+
+        @keyframes dividerGrow {
+            from { width: 0; opacity: 0; }
+            to { width: calc(100% - 80px); opacity: 1; }
+        }
+
+        /* Buttons Section */
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            padding: 0 30px 40px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 17px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: -1;
+            transform: translateX(-100%);
+            transition: transform 0.4s ease;
+        }
+
+        .btn:hover::before {
+            transform: translateX(0);
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-2px);
+        }
+
+        .btn i {
+            font-size: 22px;
+        }
+
+        .btn-discord {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-discord:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-server {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-server:hover {
+            background: var(--success-dark);
+        }
+
+        .btn-website {
+            background: var(--gray);
+            color: var(--light);
+        }
+
+        .btn-website:hover {
+            background: #3A3E4D;
+        }
+
+        /* Audio Player */
+        .audio-player {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: rgba(18, 20, 29, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            animation: slideIn 0.8s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        .audio-player:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .audio-player button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(114, 137, 218, 0.3);
+        }
+
+        .audio-player button:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        .audio-player i {
+            font-size: 20px;
+        }
+
+        .volume-control {
+            width: 100px;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 5px;
+            background: var(--gray);
+            outline: none;
+        }
+
+        .volume-control::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(114, 137, 218, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .volume-control::-webkit-slider-thumb:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        .now-playing {
+            font-size: 14px;
+            color: #9EA5C4;
+            margin-right: 15px;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: #6A6F8D;
+            font-size: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .container {
+                margin: 10px;
+                max-width: 95%;
+            }
+            
+            .avatar-container {
+                width: 130px;
+                height: 130px;
+            }
+            
+            .username {
+                font-size: 26px;
+            }
+            
+            .tag {
+                font-size: 16px;
+            }
+            
+            .btn {
+                padding: 16px;
+                font-size: 16px;
+            }
+            
+            .audio-player {
+                bottom: 15px;
+                right: 15px;
+                padding: 12px 20px;
+            }
+            
+            .now-playing {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background">
+        <div class="animated-bg"></div>
+        <div class="particles" id="particles"></div>
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="profile-badge">PREMIUM</div>
+            <div class="avatar-container">
+                <div class="avatar">
+                    <img src="https://raw.githubusercontent.com/titanxrio/SectorX/refs/heads/main/7066cc9d2f2468797f7004f688ddbad6.png" alt="d3adnet Profile Picture">
+                </div>
+            </div>
+            <h1 class="username">d3adnet</h1>
+            <div class="tag">Discord Developer & Community Leader</div>
+            
+            <div class="divider"></div>
+        </div>
+        
+        <div class="buttons">
+            <a href="https://discord.com/users/1380071939850113135" class="btn btn-discord" target="_blank">
+                <i class="fab fa-discord"></i>
+                Discord Profile
+            </a>
+            <a href="#" class="btn btn-server" target="_blank">
+                <i class="fas fa-users"></i>
+                Discord Server
+            </a>
+            <a href="https://titanlegit.com" class="btn btn-website" target="_blank">
+                <i class="fas fa-globe"></i>
+                Main Website
+            </a>
+        </div>
+        
+        <div class="footer">
+            © 2023 d3adnet profile. All rights reserved.
+        </div>
+    </div>
+    
+    <div class="audio-player">
+        <span class="now-playing">Now Playing: Ambient Vibe</span>
+        <button id="playBtn">
+            <i class="fas fa-play"></i>
+        </button>
+        <input type="range" min="0" max="100" value="80" class="volume-control" id="volumeControl">
+    </div>
+    
+    <audio id="backgroundMusic" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create animated particles
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 40;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random size and position
+                const size = Math.random() * 10 + 3;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const delay = Math.random() * 15;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.opacity = Math.random() * 0.5 + 0.2;
+                
+                particlesContainer.appendChild(particle);
+            }
+            
+            // Audio player functionality
+            const audioPlayer = document.getElementById('backgroundMusic');
+            const playBtn = document.getElementById('playBtn');
+            const playIcon = playBtn.querySelector('i');
+            const volumeControl = document.getElementById('volumeControl');
+            
+            // Play/Pause functionality
+            playBtn.addEventListener('click', function() {
+                if (audioPlayer.paused) {
+                    audioPlayer.play();
+                    playIcon.classList.remove('fa-play');
+                    playIcon.classList.add('fa-pause');
+                } else {
+                    audioPlayer.pause();
+                    playIcon.classList.remove('fa-pause');
+                    playIcon.classList.add('fa-play');
+                }
+            });
+            
+            // Volume control
+            volumeControl.addEventListener('input', function() {
+                audioPlayer.volume = this.value / 100;
+            });
+            
+            // Set initial volume
+            audioPlayer.volume = volumeControl.value / 100;
+            
+            // Try to autoplay with user interaction
+            document.body.addEventListener('click', function initAudio() {
+                // Try to play audio
+                audioPlayer.play().then(() => {
+                    playIcon.classList.remove('fa-play');
+                    playIcon.classList.add('fa-pause');
+                }).catch(error => {
+                    console.log('Autoplay prevented:', error);
+                });
+                // Remove event listener after first interaction
+                document.body.removeEventListener('click', initAudio);
+            }, { once: true });
+            
+            // Add hover effect to buttons
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', () => {
+                    button.style.transform = 'translateY(-5px)';
+                });
+                
+                button.addEventListener('mouseleave', () => {
+                    button.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
